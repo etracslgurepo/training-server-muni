@@ -8,6 +8,9 @@ public class BusinessApplicationWorkflowService extends ActiveWorkflowService {
 	@ActiveDB("business_application_task")
 	def taskDB;
 
+	@DataContext("business_application_task")
+	def taskEm;
+
 	@DataContext("business_application_task_lock")
 	def lockDB;
 
@@ -77,12 +80,18 @@ public class BusinessApplicationWorkflowService extends ActiveWorkflowService {
 		def syswft = sys_wf_transition.find( wfparam ).first(); 
 		if ( syswft ) r.to = syswft.to; 
 
-		def lockinfo = [refid: r.refid, state: r.to];  
-		lockDB.create( lockinfo ); 
-		lockDB.where('refid = :refid and state <> :state', lockinfo).delete();  
+		def task = taskEm.find([ objid: r.taskid.toString() ]).first(); 
 
 		env.TASK_MESSAGE = r.message;
-		if( r.state == 'assign-assessor') {
+
+		if ( r.action == 'assign-to-me' ) { 
+			if ( task?.assignee?.objid ) {
+				throw new Exception("This task is already assigned to "+ task.assignee.name);
+			} 
+			r.assignee = roleSvc.getCurrentUser(); 
+			env.TASK_ASSIGNEE = r.assignee; 
+		}
+		else if ( r.state == 'assign-assessor') {
 			data.assessor = roleSvc.getCurrentUser();
 			ba.update([ objid: data.objid, assessor: data.assessor, state: 'ASSESSMENT' ]);
 			env.TASK_ASSIGNEE = data.assessor;	
@@ -167,11 +176,17 @@ public class BusinessApplicationWorkflowService extends ActiveWorkflowService {
 	void afterSignal( def result ) {
 		def data = env.data;
 		def prevtask = env.prevtask;
-		if( prevtask.state == 'assign-assessor') {
+		if ( prevtask?.state == 'assign-assessor') {
 			result.assessor = data.assessor;
 		}
-		else if( prevtask.state == 'assessment') {
+		else if ( prevtask?.state == 'assessment') {
 			result.approver = data.approver;	
+		}
+
+		if ( result.task ) {
+			def lockinfo = [ refid: result.task.refid, state: result.task.state ]; 
+			lockDB.where('refid = :refid', lockinfo).delete(); 
+			lockDB.create( lockinfo ); 
 		}
 	}
 
