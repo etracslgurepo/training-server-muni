@@ -8,6 +8,9 @@ public class BusinessApplicationWorkflowService extends ActiveWorkflowService {
 	@ActiveDB("business_application_task")
 	def taskDB;
 
+	@DataContext("business_application_task")
+	def taskEm;
+
 	@DataContext("business_application_task_lock")
 	def lockDB;
 
@@ -32,21 +35,47 @@ public class BusinessApplicationWorkflowService extends ActiveWorkflowService {
 	@DataContext('sys_wf_transition') 
 	def sys_wf_transition; 
 
+	@DataContext( dynamic=true ) 
+	def dynaEm; 
+
 	@Service 
 	def self; 
 
 	String processname = "business_application";
 
-	void afterOpenTask(def task) {
-		task.data = appSvc.open( [objid: task.refid ] );
+
+	void beforeStart( def task ) {
+		resolveTaskData( task );
+	}
+
+	void afterOpenTask( def task ) {
+		task.data = appSvc.open([ objid: task.refid ]);
+
+		resolveTaskData( task );
 
 		/******************************************************************
 		* if current state is not assign assessor which is a group, do not  
 		* remove message. All else remove message when opening the document.
 		*******************************************************************/
-		if( task.state != 'assign-assessor' ) {
+		if ( task.state != 'assign-assessor' ) {
 			notificationService.removeMessage([objid: task.objid]);
 		}
+	}
+
+	void resolveTaskData( def task ) {
+		if ( task.data?.lobs ) { 
+			def lobids = task.data.lobs.collect{ it.lobid }.findAll{( it )}.unique(); 
+
+			def mm = [:];
+			mm.filter = " lob.objid IN ('"+ lobids.join("','") +"') "; 
+
+			def attrs = dynaEm.lookup('lob').getLOBAttributes( mm ); 
+			attrs = attrs.collect{ it.lobattributeid }.findAll{( it )} 
+			task.data.lobattributes = attrs; 
+
+			def lobclasses = task.data.lobs.collect{ it.classification?.objid }.findAll{( it )}.unique(); 
+			task.data.lobclassifications = lobclasses; 
+		} 		
 	}
 
 
@@ -54,6 +83,12 @@ public class BusinessApplicationWorkflowService extends ActiveWorkflowService {
 		if( task.state == 'assessment' ) {
 			transition.assignees = roleSvc.getApproverList();
 		}
+	}
+
+
+	@ProxyMethod 
+	void validateBeforeSignal( task ) {
+		// this will be intercepted by other services 
 	}
 
 	void beforeSignal( r ) { 
@@ -71,15 +106,27 @@ public class BusinessApplicationWorkflowService extends ActiveWorkflowService {
 			throw w;
 		}
 
-		def syswft = sys_wf_transition.find([ processname: processname, action: r.action, parentid: r.state ]).first(); 
+		def wfparam = [ processname: processname, action: r.action, parentid: r.state ]; 
+		if ( r.to ) wfparam.to = r.to; 
+
+		def syswft = sys_wf_transition.find( wfparam ).first(); 
 		if ( syswft ) r.to = syswft.to; 
 
-		def lockinfo = [refid: r.refid, state: r.to];  
-		lockDB.create( lockinfo ); 
-		lockDB.where('refid = :refid and state <> :state', lockinfo).delete();  
+		def task = getWfProxy().findTask( r.taskid.toString()); 
+		r.role = task.role; 
+
+		self.validateBeforeSignal( r ); 
 
 		env.TASK_MESSAGE = r.message;
-		if( r.state == 'assign-assessor') {
+
+		if ( r.action == 'assign-to-me' ) { 
+			if ( task?.assignee?.objid ) {
+				throw new Exception("This task is already assigned to "+ task.assignee.name);
+			} 
+			r.assignee = roleSvc.getCurrentUser(); 
+			env.TASK_ASSIGNEE = r.assignee; 
+		}
+		else if ( r.state == 'assign-assessor') {
 			data.assessor = roleSvc.getCurrentUser();
 			ba.update([ objid: data.objid, assessor: data.assessor, state: 'ASSESSMENT' ]);
 			env.TASK_ASSIGNEE = data.assessor;	
@@ -164,11 +211,17 @@ public class BusinessApplicationWorkflowService extends ActiveWorkflowService {
 	void afterSignal( def result ) {
 		def data = env.data;
 		def prevtask = env.prevtask;
-		if( prevtask.state == 'assign-assessor') {
+		if ( prevtask?.state == 'assign-assessor') {
 			result.assessor = data.assessor;
 		}
-		else if( prevtask.state == 'assessment') {
+		else if ( prevtask?.state == 'assessment') {
 			result.approver = data.approver;	
+		}
+
+		if ( result.task ) {
+			def lockinfo = [ refid: result.task.refid, state: result.task.state ]; 
+			lockDB.where('refid = :refid', lockinfo).delete(); 
+			lockDB.create( lockinfo ); 
 		}
 	}
 

@@ -5,6 +5,9 @@ import com.rameses.services.extended.*
 
 public class BusinessReceivableService  {
 
+	@DataContext( dynamic=true ) 
+	def dynaEm; 
+
 	@ActiveDB("business_receivable")
 	def em;
 
@@ -43,9 +46,20 @@ public class BusinessReceivableService  {
 	} 
 
 	@ProxyMethod
-	public void removeReceivable( o ) {
-		def x = em.read( o ); 
-		if ( x ) em.delete( o ); 
+	public void removeReceivable( param ) {
+		def items = null; 
+		if ( param?.items instanceof List ) {
+			items = param.items;
+		} 
+		else if ( param instanceof Map ) {
+			items = [ param ];
+		}
+
+		def ids = items.collect{ it?.objid }.findAll{( it )} 
+		if ( ids ) {
+			def em = dynaEm.lookup('business_receivable');
+			em.where("objid IN ('"+ ids.join("','") +"')", [:]).delete(); 
+		}
 	} 
 
 	@ProxyMethod

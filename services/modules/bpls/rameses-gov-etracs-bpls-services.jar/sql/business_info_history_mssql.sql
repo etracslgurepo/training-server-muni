@@ -6,11 +6,10 @@ WHERE businessid = $P{businessid}
 ORDER BY lob_name
 
 [getYears]
-SELECT DISTINCT appyear 
+SELECT DISTINCT TOP 5 appyear 
 FROM business_application 
 WHERE business_objid = $P{businessid} 
 ORDER BY appyear DESC 
-LIMIT 5
 
 [getValues]
 SELECT 
@@ -18,11 +17,11 @@ SELECT
 	bai.decimalvalue, bai.intvalue, bai.stringvalue, bai.boolvalue 
 FROM 
 	( 
-		SELECT DISTINCT appyear, business_objid 
+		SELECT DISTINCT TOP 5 
+			appyear, business_objid 
 		FROM business_application 
 		WHERE business_objid = $P{businessid} 
 		ORDER BY appyear DESC 
-		LIMIT 5 
 	)tmp 
 	INNER JOIN business_application ba ON (ba.business_objid = tmp.business_objid AND ba.appyear = tmp.appyear) 
 	INNER JOIN business_application_info bai on bai.applicationid = ba.objid 

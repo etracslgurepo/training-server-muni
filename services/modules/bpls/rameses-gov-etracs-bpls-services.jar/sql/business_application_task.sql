@@ -50,8 +50,16 @@ select tsk.*
 from ( 
 	select refid, max(startdate) as startdate  
 	from business_application_task 
-	where refid = $P{refid}   
+	where refid = $P{refid} ${filter} 
 	group by refid 
 )tmp  
 	inner join business_application_task tsk on tsk.refid=tmp.refid 
 where tsk.startdate=tmp.startdate 
+
+[findOpenForkTask]
+select t.*, p.state as parentstate  
+from business_application_task t 
+	left join business_application_task p on p.objid = t.parentprocessid
+where t.refid = $P{refid} 
+	and t.parentprocessid = $P{parentprocessid} 
+	and t.enddate IS NULL 

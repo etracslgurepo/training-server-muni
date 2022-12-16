@@ -199,6 +199,9 @@ from (
 
 
 [findUnpaidBalance]
-select sum(amount-amtpaid) as balance 
-from business_receivable 
-where applicationid=$P{applicationid}
+select (sum(r.amount) - sum(r.amtpaid)) as balance 
+from business b, business_application a, business_receivable r 
+where b.objid = $P{businessid} 
+  and a.business_objid = b.objid 
+  and r.applicationid = a.objid 
+  and a.state in ('PAYMENT','RELEASE','COMPLETED') 
