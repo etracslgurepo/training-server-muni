@@ -32,10 +32,9 @@ DELETE FROM business_application_info WHERE applicationid=$P{applicationid} AND 
 [getInfos]
 select 
 	bai.*, 
-	ifnull((
-		select assessmenttype from business_application_lob 
+	isnull((
+		select top 1 assessmenttype from business_application_lob 
 		where applicationid = bai.applicationid and lobid = bai.lob_objid 
-		limit 1 
 	), (case 
 		when a.apptype = 'ADDITIONAL' then 'NEW'
 		when a.apptype = 'RETIRELOB' then 'RETIRE'

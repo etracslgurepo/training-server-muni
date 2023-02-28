@@ -162,22 +162,36 @@ public class BusinessApplicationWorkflowService extends ActiveWorkflowService {
 		else if(r.state == 'approval' && r.action=='return-assessment') {
 			env.TASK_ASSIGNEE = data.assessor;
 		}
-		else if ( r.to == 'payment' ) { 
+		else if ( r.to.toString().matches('payment|fork-payment')) { 
 			ba.update( [objid:data.objid, state:'PAYMENT'] );	
 			self.notifyChangeAppState([ objid: data.objid, state: 'PAYMENT' ]); 
 		} 		
 		else if(r.state=='payment' && r.action == 'reverse-approval') {
 			def test = receivableSvc.getHasPaidReceivable([applicationid:data.objid]);
-			if( test ) {
+			if ( test ) {
 				throw new Exception("Cannot reverse approval since payments have already been made" );
 			}
-			ba.update( [objid:data.objid, state:'ASSESSMENT'] );
+
+			if ( task.parentprocessid ) { 
+				r._close_fork_tasks = true; 
+				r._close_fork_tasks_message = r.action; 
+			}
+
 			env.TASK_ASSIGNEE = data.approver;
+			ba.update( [objid:data.objid, state:'ASSESSMENT'] );
 			self.notifyChangeAppState([ objid: data.objid, state: 'ASSESSMENT' ]); 
 		}
-		else if(r.state=='payment') { 
-			ba.update( [objid:data.objid, state:'RELEASE'] );
-			self.notifyChangeAppState([ objid: data.objid, state: 'RELEASE' ]); 
+		else if ( r.state == 'payment' ) { 
+			def open_fork_task = null; 
+			if ( r.parentprocessid ) { 
+				def mm = [ refid: r.refid, parentprocessid: r.parentprocessid ]; 
+				open_fork_task = taskDB.findOpenForkTask( mm );
+			}
+
+			if ( open_fork_task == null ) {
+				ba.update([ objid: data.objid, state: 'RELEASE' ]);
+				self.notifyChangeAppState([ objid: data.objid, state: 'RELEASE' ]); 				
+			}
 		}
 		else if(r.state=='assign-issuing-officer') {
 			env.TASK_ASSIGNEE = roleSvc.getCurrentUser(); 
@@ -185,11 +199,16 @@ public class BusinessApplicationWorkflowService extends ActiveWorkflowService {
 		else if(r.state=='release' && r.action == 'revert') { 
 			ba.update([ objid: data.objid, state: 'PAYMENT' ]); 
 			appSvc.revert([
-				objid: data.objid, apptype: data.apptype, txnmode: data.txnmode, 
-				action: r.action, fromstate: r.state, tostate: 'payment' 
+				objid: data.objid, apptype: data.apptype, 
+				txnmode: data.txnmode, action: r.action, 
+				fromstate: r.state, tostate: 'payment', 
+				payment: data.payment 
 			]); 
 			env.TASK_ASSIGNEE = data.approver; 
-			self.notifyChangeAppState([ objid: data.objid, state: 'PAYMENT', action: 'revert' ]); 
+			self.notifyChangeAppState([ 
+				objid: data.objid, state: 'PAYMENT', 
+				action: 'revert', payment: data.payment  
+			]); 
 		}
 		else if( r.state=='release' && r.to=='end' ) {
 			appSvc.release( data );
@@ -203,6 +222,36 @@ public class BusinessApplicationWorkflowService extends ActiveWorkflowService {
 		o.assignee = env.TASK_ASSIGNEE;
 		o.message = env.TASK_MESSAGE;
 	}
+
+	void afterCreateTask( def o ) {
+		self.notifyAfterCreateTask( o ); 
+	}
+
+	@ProxyMethod
+	public void notifyAfterCreateTask( param ) {
+		// to be intercepted by other services 
+	}
+
+	void closeForkTasks( Map param ) {
+		if ( !param.processid ) 
+			throw new Exception("processid param is required in closeForkTasks"); 
+		if ( !param.enddate ) 
+			throw new Exception("enddate param is required in closeForkTasks"); 
+		if ( !param.actor ) 
+			throw new Exception("actor param is required in closeForkTasks"); 
+
+		def list = taskDB.getForkTasks([ processid: param.processid ]);
+		list.each{ 
+			def uu = [:]; 
+			uu.actor = param.actor; 
+			uu.message = param.message; 
+			if ( !it.enddate ) { 
+				uu.enddate = param.enddate; 
+			} 
+			taskEm.find([ objid: it.objid ]).update( uu ); 
+		}
+	}
+
 
 	/*******************************************************************************************
 	* we have no choice but to use prevtask instead bec. the newtask is not being passed through
@@ -260,13 +309,21 @@ public class BusinessApplicationWorkflowService extends ActiveWorkflowService {
 
 	@ProxyMethod
 	public def getTaskFromAppid( def o ) {
-		if(!o.applicationid) throw new Exception("applicationid is required in getTaskFromAppid");
+		if(!o.applicationid) throw new Exception("applicationid param is required in getTaskFromAppid");
 		return taskDB.findCurrentTaskByAppid( o );
 	}
 
 	@ProxyMethod
+	public def findOpenForkTask( def o ) {
+		if ( !o.applicationid ) throw new Exception("applicationid param is required in findOpenForkTask");
+		
+		def mm = [ refid: o.applicationid, parentprocessid: o.parentprocessid ]; 
+		return taskDB.findOpenForkTask( mm );
+	}
+
+	@ProxyMethod
 	public void deleteTasks(def o) {
-		if(!o.applicationid) throw new Exception("applicationid required in abortTasks"); 
+		if(!o.applicationid) throw new Exception("applicationid param is required in deleteTasks"); 
 		taskDB.deleteTasks( o );
 	}
 

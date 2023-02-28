@@ -20,5 +20,18 @@ class BfpBusinessApplicationWorkflowInterceptor {
 				} 
 			}
 		}
-	}  
+	} 
+
+	@After(pattern="BusinessApplicationWorkflowService.notifyAfterCreateTask")
+	public void notifyAfterCreateTask( evt ) { 
+		def task = evt.args[0];
+		if ( task.state.toString().toLowerCase() == 'bfp' ) {
+			def em = dynaEm.lookup('bpls_fee_bfp'); 
+			def mm = [ applicationid: task.refid, tag: task.role ]; 
+			em.getList( mm ).each{ o-> 
+				em.updateFee([ objid: o.objid, state: 1 ]); 
+			}
+		} 
+	} 
+
 } 
