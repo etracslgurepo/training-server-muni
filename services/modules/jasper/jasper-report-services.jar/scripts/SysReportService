@@ -30,6 +30,9 @@ class SysReportService {
 	@Service(dynamic=true)
 	def dynSvc;
 
+	@DataContext(dynamic=true)
+	def dynEm;
+
 	@Env 
 	def env;
 
@@ -141,8 +144,10 @@ class SysReportService {
             bnd.setVariable( "QRY", qrySvc );
             bnd.setVariable( "SERVICE", dynSvc );
             bnd.setVariable( "PARAMS", ((o.params) ? o.params : [:]) );
+            bnd.setVariable( "EM", dynEm );
 			Script s = InvokerHelper.createScript( script.getClass(), bnd);
-            rlist = s.run();			
+            rlist = s.run();
+            if(!(rlist instanceof List)) rlist = [rlist];			
 		}
 		else {
 			throw new Exception("no query type handler found for " + rpt.querytype );	
