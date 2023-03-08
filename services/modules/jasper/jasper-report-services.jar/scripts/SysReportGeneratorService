@@ -109,7 +109,7 @@ class SysReportGeneratorService  {
 		def tp = new SysReportTemplate( "/report-files", tmp.filepath );
 		def jReport = tp.getReport(tmpSrc);
 
-		def classLoader = new CustomClassLoader( tp.getRootPath(), tp.getContextPath() ); 
+		def classLoader = new CustomClassLoader( tp ); 
 		 
 		def report_params = [:];
 		report_params.REPORT_CLASS_LOADER = classLoader;
@@ -136,24 +136,15 @@ class SysReportGeneratorService  {
 
 public class CustomClassLoader extends ClassLoader {
 	
-	String rootPath;
-	String contextPath;
+	def reportTemplate;
 	
-	public CustomClassLoader( def root, def cpath ) {
+	public CustomClassLoader( def tp ) {
 		super();
-		rootPath = root;
-		contextPath  = cpath;
+		reportTemplate = tp;
 	}
 
 	public URL getResource(String name) { 
-		def fname =  rootPath + contextPath + "/" + name;
-		File f = new File( fname );
-		if( f.exists() ) {
-			return f.toURI().toURL();	
-		}
-		else {
-			return null;
-		}
+		return reportTemplate.getResource( name );
     }
 }
 

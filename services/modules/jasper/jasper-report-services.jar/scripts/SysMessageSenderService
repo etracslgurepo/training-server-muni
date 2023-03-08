@@ -63,6 +63,7 @@ class SysMessageSenderService {
 		params.putAll( o );
 
 		def temp = template.find( [objid: templateid ]).first();
+		if(!temp) throw new Exception("SysMessageSenderService.send error.templateid " + templateid + " not found in sys_message_template")
 		if(!temp.statement) throw new Exception("statement is required in sys_message_template");
 		if(!temp.subject) throw new Exception("subject is required in sys_message_template");
 		if(!temp.message) throw new Exception("message is required in sys_message_template");
