@@ -13,9 +13,15 @@ A. Restore Databases
 
 5. Load and execute the file "_res/_initial/mssql/02-create-notification-db.sql" 
 
-6. Restore the backup file "_res/_initial/mssql/training_etracs_muni.bak" 
+6. Restore the backup file using the SQL Management Studio: 
 
-7. Load and execute the file "_res/_initial/mssql/patches/01-patch-etracs-2.5.05.01-007.sql" 
+   "_res/_initial/mssql/training_etracs_muni.bak" 
+
+
+7. Load and execute the following patches:
+
+   "_res/_initial/mssql/patches/01-patch-etracs-2.5.05.01-007.sql" 
+   "_res/_initial/mssql/patches/01-patch-etracs-2.5.05.01-008.sql" 
 
 8. DONE !!!
 

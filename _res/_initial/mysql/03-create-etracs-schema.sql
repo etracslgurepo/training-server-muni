@@ -2263,6 +2263,38 @@ CREATE TABLE `business_lessor` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `business_officefee`
+--
+
+DROP TABLE IF EXISTS `business_officefee`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `business_officefee` (
+  `objid` varchar(50) NOT NULL,
+  `applicationid` varchar(50) NOT NULL,
+  `txntype_objid` varchar(50) NOT NULL,
+  `account_objid` varchar(50) NOT NULL,
+  `account_title` varchar(100) NOT NULL,
+  `amount` decimal(16,2) NOT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  `department` varchar(50) DEFAULT NULL,
+  `dtcreated` datetime NOT NULL,
+  `createdby_objid` varchar(50) NOT NULL,
+  `createdby_name` varchar(150) NOT NULL,
+  `role` varchar(50) NOT NULL,
+  PRIMARY KEY (`objid`),
+  UNIQUE KEY `uix_applicationid_account_objid` (`applicationid`,`account_objid`),
+  KEY `ix_applicationid` (`applicationid`),
+  KEY `ix_account_objid` (`account_objid`),
+  KEY `ix_txntype_objid` (`txntype_objid`),
+  KEY `ix_dtcreated` (`dtcreated`),
+  KEY `ix_createdby_objid` (`createdby_objid`),
+  CONSTRAINT `fk_business_officefee_applicationid` FOREIGN KEY (`applicationid`) REFERENCES `business_application` (`objid`),
+  CONSTRAINT `fk_business_officefee_txntype_objid` FOREIGN KEY (`txntype_objid`) REFERENCES `business_billitem_txntype` (`objid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `business_payment`
 --
 
@@ -10772,6 +10804,9 @@ CREATE TABLE `sys_fileitem` (
   `filelocid` varchar(50) DEFAULT NULL,
   `filesize` int(11) DEFAULT NULL,
   `thumbnail` text,
+  `filetype` varchar(10) NOT NULL,
+  `bytestransferred` int(11) DEFAULT NULL,
+  `filedir` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`objid`),
   KEY `ix_filelocid` (`filelocid`),
   KEY `ix_parentid` (`parentid`),
@@ -10797,6 +10832,46 @@ CREATE TABLE `sys_fileloc` (
   `info` text,
   PRIMARY KEY (`objid`),
   KEY `ix_loctype` (`loctype`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `sys_message_queue`
+--
+
+DROP TABLE IF EXISTS `sys_message_queue`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sys_message_queue` (
+  `objid` varchar(50) NOT NULL,
+  `state` int(11) DEFAULT NULL,
+  `dtsent` datetime DEFAULT NULL,
+  `email` varchar(355) DEFAULT NULL,
+  `mobileno` varchar(50) DEFAULT NULL,
+  `subject` varchar(255) DEFAULT NULL,
+  `message` mediumtext,
+  `errmsg` varchar(255) DEFAULT NULL,
+  `connection` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`objid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `sys_message_template`
+--
+
+DROP TABLE IF EXISTS `sys_message_template`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sys_message_template` (
+  `objid` varchar(50) NOT NULL,
+  `statement` mediumtext,
+  `subject` varchar(255) DEFAULT NULL,
+  `message` mediumtext,
+  `emailfield` varchar(255) DEFAULT NULL,
+  `mobilenofield` varchar(255) DEFAULT NULL,
+  `connection` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`objid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10928,6 +11003,7 @@ CREATE TABLE `sys_report_def` (
   `state` varchar(10) DEFAULT NULL,
   `description` varchar(255) DEFAULT NULL,
   `properties` longtext,
+  `paramhandler` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`name`),
   KEY `ix_template` (`template`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -13934,6 +14010,33 @@ SET character_set_client = utf8;
 SET character_set_client = @saved_cs_client;
 
 --
+-- Temporary table structure for view `vw_lob`
+--
+
+DROP TABLE IF EXISTS `vw_lob`;
+/*!50001 DROP VIEW IF EXISTS `vw_lob`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `vw_lob` (
+  `objid` tinyint NOT NULL,
+  `state` tinyint NOT NULL,
+  `name` tinyint NOT NULL,
+  `classification_objid` tinyint NOT NULL,
+  `psicid` tinyint NOT NULL,
+  `psic_code` tinyint NOT NULL,
+  `psic_description` tinyint NOT NULL,
+  `psic_class_code` tinyint NOT NULL,
+  `psic_class_description` tinyint NOT NULL,
+  `psic_group_code` tinyint NOT NULL,
+  `psic_group_description` tinyint NOT NULL,
+  `psic_division_code` tinyint NOT NULL,
+  `psic_division_description` tinyint NOT NULL,
+  `psic_section_code` tinyint NOT NULL,
+  `psic_section_description` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+
+--
 -- Temporary table structure for view `vw_machine_smv`
 --
 
@@ -14127,6 +14230,30 @@ SET character_set_client = utf8;
   `permittype` tinyint NOT NULL,
   `officetype` tinyint NOT NULL,
   `step` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vw_psic_subclass`
+--
+
+DROP TABLE IF EXISTS `vw_psic_subclass`;
+/*!50001 DROP VIEW IF EXISTS `vw_psic_subclass`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `vw_psic_subclass` (
+  `code` tinyint NOT NULL,
+  `description` tinyint NOT NULL,
+  `details` tinyint NOT NULL,
+  `classid` tinyint NOT NULL,
+  `class_code` tinyint NOT NULL,
+  `class_description` tinyint NOT NULL,
+  `group_code` tinyint NOT NULL,
+  `group_description` tinyint NOT NULL,
+  `division_code` tinyint NOT NULL,
+  `division_description` tinyint NOT NULL,
+  `section_code` tinyint NOT NULL,
+  `section_description` tinyint NOT NULL
 ) ENGINE=MyISAM */;
 SET character_set_client = @saved_cs_client;
 
@@ -14369,6 +14496,117 @@ SET character_set_client = utf8;
   `voided` tinyint NOT NULL,
   `voidamount` tinyint NOT NULL,
   `formtypeindex` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vw_remittance_eor`
+--
+
+DROP TABLE IF EXISTS `vw_remittance_eor`;
+/*!50001 DROP VIEW IF EXISTS `vw_remittance_eor`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `vw_remittance_eor` (
+  `remittance_objid` tinyint NOT NULL,
+  `remittance_controldate` tinyint NOT NULL,
+  `remittance_controlno` tinyint NOT NULL,
+  `remittanceid` tinyint NOT NULL,
+  `formtype` tinyint NOT NULL,
+  `formtypeindexno` tinyint NOT NULL,
+  `formno` tinyint NOT NULL,
+  `series` tinyint NOT NULL,
+  `receiptno` tinyint NOT NULL,
+  `receiptdate` tinyint NOT NULL,
+  `amount` tinyint NOT NULL,
+  `voided` tinyint NOT NULL,
+  `voidamount` tinyint NOT NULL,
+  `paidby` tinyint NOT NULL,
+  `paidbyaddress` tinyint NOT NULL,
+  `payer_objid` tinyint NOT NULL,
+  `collector_objid` tinyint NOT NULL,
+  `receiptid` tinyint NOT NULL,
+  `collectiontype_objid` tinyint NOT NULL,
+  `collectiontype_name` tinyint NOT NULL,
+  `org_objid` tinyint NOT NULL,
+  `org_name` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vw_remittance_eoritem`
+--
+
+DROP TABLE IF EXISTS `vw_remittance_eoritem`;
+/*!50001 DROP VIEW IF EXISTS `vw_remittance_eoritem`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `vw_remittance_eoritem` (
+  `remittanceid` tinyint NOT NULL,
+  `remittance_controldate` tinyint NOT NULL,
+  `remittance_controlno` tinyint NOT NULL,
+  `remittance_state` tinyint NOT NULL,
+  `collectiontype_objid` tinyint NOT NULL,
+  `collectiontype_name` tinyint NOT NULL,
+  `org_objid` tinyint NOT NULL,
+  `org_name` tinyint NOT NULL,
+  `formtype` tinyint NOT NULL,
+  `formno` tinyint NOT NULL,
+  `formtypeindex` tinyint NOT NULL,
+  `receiptid` tinyint NOT NULL,
+  `receiptdate` tinyint NOT NULL,
+  `receiptno` tinyint NOT NULL,
+  `paidby` tinyint NOT NULL,
+  `paidbyaddress` tinyint NOT NULL,
+  `collectorid` tinyint NOT NULL,
+  `fundid` tinyint NOT NULL,
+  `acctid` tinyint NOT NULL,
+  `acctcode` tinyint NOT NULL,
+  `acctname` tinyint NOT NULL,
+  `remarks` tinyint NOT NULL,
+  `amount` tinyint NOT NULL,
+  `voided` tinyint NOT NULL,
+  `voidamount` tinyint NOT NULL
+) ENGINE=MyISAM */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vw_remittance_eorshare`
+--
+
+DROP TABLE IF EXISTS `vw_remittance_eorshare`;
+/*!50001 DROP VIEW IF EXISTS `vw_remittance_eorshare`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE TABLE `vw_remittance_eorshare` (
+  `remittanceid` tinyint NOT NULL,
+  `remittance_controldate` tinyint NOT NULL,
+  `remittance_controlno` tinyint NOT NULL,
+  `remittance_state` tinyint NOT NULL,
+  `collectiontype_objid` tinyint NOT NULL,
+  `collectiontype_name` tinyint NOT NULL,
+  `org_objid` tinyint NOT NULL,
+  `org_name` tinyint NOT NULL,
+  `formtype` tinyint NOT NULL,
+  `formno` tinyint NOT NULL,
+  `formtypeindex` tinyint NOT NULL,
+  `receiptid` tinyint NOT NULL,
+  `receiptdate` tinyint NOT NULL,
+  `receiptno` tinyint NOT NULL,
+  `paidby` tinyint NOT NULL,
+  `paidbyaddress` tinyint NOT NULL,
+  `collectorid` tinyint NOT NULL,
+  `receiptitemid` tinyint NOT NULL,
+  `refacctid` tinyint NOT NULL,
+  `reffundid` tinyint NOT NULL,
+  `fundid` tinyint NOT NULL,
+  `acctid` tinyint NOT NULL,
+  `acctcode` tinyint NOT NULL,
+  `acctname` tinyint NOT NULL,
+  `remarks` tinyint NOT NULL,
+  `amount` tinyint NOT NULL,
+  `voided` tinyint NOT NULL,
+  `voidamount` tinyint NOT NULL
 ) ENGINE=MyISAM */;
 SET character_set_client = @saved_cs_client;
 
@@ -14807,12 +15045,6 @@ CREATE TABLE `workflowstate` (
   KEY `ix_username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Current Database: `training_etracs`
---
-
-USE `training_etracs`;
 
 --
 -- Final view structure for view `sys_user_role`
@@ -15936,6 +16168,25 @@ USE `training_etracs`;
 /*!50001 SET collation_connection      = @saved_col_connection */;
 
 --
+-- Final view structure for view `vw_lob`
+--
+
+/*!50001 DROP TABLE IF EXISTS `vw_lob`*/;
+/*!50001 DROP VIEW IF EXISTS `vw_lob`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_lob` AS select `lob`.`objid` AS `objid`,`lob`.`state` AS `state`,`lob`.`name` AS `name`,`lob`.`classification_objid` AS `classification_objid`,`lob`.`psicid` AS `psicid`,`sc`.`code` AS `psic_code`,`sc`.`description` AS `psic_description`,`sc`.`class_code` AS `psic_class_code`,`sc`.`class_description` AS `psic_class_description`,`sc`.`group_code` AS `psic_group_code`,`sc`.`group_description` AS `psic_group_description`,`sc`.`division_code` AS `psic_division_code`,`sc`.`division_description` AS `psic_division_description`,`sc`.`section_code` AS `psic_section_code`,`sc`.`section_description` AS `psic_section_description` from (`lob` left join `vw_psic_subclass` `sc` on((`sc`.`code` = `lob`.`psicid`))) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
 -- Final view structure for view `vw_machine_smv`
 --
 
@@ -16045,6 +16296,25 @@ USE `training_etracs`;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `vw_online_business_application` AS select `oa`.`objid` AS `objid`,`oa`.`state` AS `state`,`oa`.`dtcreated` AS `dtcreated`,`oa`.`createdby_objid` AS `createdby_objid`,`oa`.`createdby_name` AS `createdby_name`,`oa`.`controlno` AS `controlno`,`oa`.`apptype` AS `apptype`,`oa`.`appyear` AS `appyear`,`oa`.`appdate` AS `appdate`,`oa`.`prevapplicationid` AS `prevapplicationid`,`oa`.`business_objid` AS `business_objid`,`b`.`bin` AS `bin`,`b`.`tradename` AS `tradename`,`b`.`businessname` AS `businessname`,`b`.`address_text` AS `address_text`,`b`.`address_objid` AS `address_objid`,`b`.`owner_name` AS `owner_name`,`b`.`owner_address_text` AS `owner_address_text`,`b`.`owner_address_objid` AS `owner_address_objid`,`b`.`yearstarted` AS `yearstarted`,`b`.`orgtype` AS `orgtype`,`b`.`permittype` AS `permittype`,`b`.`officetype` AS `officetype`,`oa`.`step` AS `step` from ((`online_business_application` `oa` join `business_application` `a` on((`a`.`objid` = `oa`.`prevapplicationid`))) join `business` `b` on((`b`.`objid` = `a`.`business_objid`))) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_psic_subclass`
+--
+
+/*!50001 DROP TABLE IF EXISTS `vw_psic_subclass`*/;
+/*!50001 DROP VIEW IF EXISTS `vw_psic_subclass`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_psic_subclass` AS select `sc`.`code` AS `code`,`sc`.`description` AS `description`,`sc`.`details` AS `details`,`sc`.`classid` AS `classid`,`c`.`code` AS `class_code`,`c`.`description` AS `class_description`,`g`.`code` AS `group_code`,`g`.`description` AS `group_description`,`d`.`code` AS `division_code`,`d`.`description` AS `division_description`,`s`.`code` AS `section_code`,`s`.`description` AS `section_description` from ((((`psic_subclass` `sc` join `psic_class` `c` on((`c`.`code` = `sc`.`classid`))) join `psic_group` `g` on((`g`.`code` = `c`.`groupid`))) join `psic_division` `d` on((`d`.`code` = `g`.`divisionid`))) join `psic_section` `s` on((`s`.`code` = `d`.`sectionid`))) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -16178,6 +16448,63 @@ USE `training_etracs`;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `vw_remittance_cashreceiptshare` AS select `c`.`remittanceid` AS `remittanceid`,`r`.`controldate` AS `remittance_controldate`,`r`.`controlno` AS `remittance_controlno`,`r`.`collectionvoucherid` AS `collectionvoucherid`,`c`.`formno` AS `formno`,`c`.`formtype` AS `formtype`,`c`.`controlid` AS `controlid`,`c`.`series` AS `series`,`cs`.`receiptid` AS `receiptid`,`c`.`receiptdate` AS `receiptdate`,`c`.`receiptno` AS `receiptno`,`c`.`paidby` AS `paidby`,`c`.`paidbyaddress` AS `paidbyaddress`,`c`.`org_objid` AS `org_objid`,`c`.`org_name` AS `org_name`,`c`.`collectiontype_objid` AS `collectiontype_objid`,`c`.`collectiontype_name` AS `collectiontype_name`,`c`.`collector_objid` AS `collectorid`,`c`.`collector_name` AS `collectorname`,`c`.`collector_title` AS `collectortitle`,`cs`.`refitem_objid` AS `refacctid`,`ia`.`fund_objid` AS `fundid`,`ia`.`objid` AS `acctid`,`ia`.`code` AS `acctcode`,`ia`.`title` AS `acctname`,(case when isnull(`v`.`objid`) then `cs`.`amount` else 0.0 end) AS `amount`,(case when isnull(`v`.`objid`) then 0 else 1 end) AS `voided`,(case when isnull(`v`.`objid`) then 0.0 else `cs`.`amount` end) AS `voidamount`,(case when (`c`.`formtype` = 'serial') then 0 else 1 end) AS `formtypeindex` from ((((`remittance` `r` join `cashreceipt` `c` on((`c`.`remittanceid` = `r`.`objid`))) join `cashreceipt_share` `cs` on((`cs`.`receiptid` = `c`.`objid`))) join `itemaccount` `ia` on((`ia`.`objid` = `cs`.`payableitem_objid`))) left join `cashreceipt_void` `v` on((`v`.`receiptid` = `c`.`objid`))) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_remittance_eor`
+--
+
+/*!50001 DROP TABLE IF EXISTS `vw_remittance_eor`*/;
+/*!50001 DROP VIEW IF EXISTS `vw_remittance_eor`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_remittance_eor` AS select `r`.`objid` AS `remittance_objid`,`r`.`controldate` AS `remittance_controldate`,`r`.`controlno` AS `remittance_controlno`,`c`.`remittanceid` AS `remittanceid`,'serial' AS `formtype`,0 AS `formtypeindexno`,'EOR' AS `formno`,(case when (`c`.`receiptno` like 'EOR%') then substr(`c`.`receiptno`,4) else `c`.`receiptno` end) AS `series`,`c`.`receiptno` AS `receiptno`,`c`.`receiptdate` AS `receiptdate`,`c`.`amount` AS `amount`,0 AS `voided`,0.0 AS `voidamount`,`c`.`paidby` AS `paidby`,`c`.`paidbyaddress` AS `paidbyaddress`,`c`.`payer_objid` AS `payer_objid`,'eor' AS `collector_objid`,`c`.`objid` AS `receiptid`,`c`.`txntype` AS `collectiontype_objid`,`po`.`txntypename` AS `collectiontype_name`,`po`.`locationid` AS `org_objid`,`org`.`name` AS `org_name` from (((`eor`.`eor_remittance` `r` join `eor`.`eor` `c` on((`c`.`remittanceid` = `r`.`objid`))) left join `eor`.`eor_paymentorder_paid` `po` on((`po`.`objid` = `c`.`paymentrefid`))) left join `training_etracs`.`sys_org` `org` on((`org`.`objid` = `po`.`locationid`))) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_remittance_eoritem`
+--
+
+/*!50001 DROP TABLE IF EXISTS `vw_remittance_eoritem`*/;
+/*!50001 DROP VIEW IF EXISTS `vw_remittance_eoritem`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_remittance_eoritem` AS select `c`.`remittanceid` AS `remittanceid`,`r`.`controldate` AS `remittance_controldate`,`r`.`controlno` AS `remittance_controlno`,`r`.`state` AS `remittance_state`,`c`.`txntype` AS `collectiontype_objid`,`po`.`txntypename` AS `collectiontype_name`,`po`.`locationid` AS `org_objid`,`org`.`name` AS `org_name`,'serial' AS `formtype`,'EOR' AS `formno`,0 AS `formtypeindex`,`c`.`objid` AS `receiptid`,`c`.`receiptdate` AS `receiptdate`,`c`.`receiptno` AS `receiptno`,`c`.`paidby` AS `paidby`,`c`.`paidbyaddress` AS `paidbyaddress`,'EOR' AS `collectorid`,`ci`.`item_fund_objid` AS `fundid`,`ci`.`item_objid` AS `acctid`,`ci`.`item_code` AS `acctcode`,`ci`.`item_title` AS `acctname`,`ci`.`remarks` AS `remarks`,`ci`.`amount` AS `amount`,0 AS `voided`,0.0 AS `voidamount` from ((((`eor`.`eor_remittance` `r` join `eor`.`eor` `c` on((`c`.`remittanceid` = `r`.`objid`))) join `eor`.`eor_item` `ci` on((`ci`.`parentid` = `c`.`objid`))) left join `eor`.`eor_paymentorder_paid` `po` on((`po`.`objid` = `c`.`paymentrefid`))) left join `training_etracs`.`sys_org` `org` on((`org`.`objid` = `po`.`locationid`))) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vw_remittance_eorshare`
+--
+
+/*!50001 DROP TABLE IF EXISTS `vw_remittance_eorshare`*/;
+/*!50001 DROP VIEW IF EXISTS `vw_remittance_eorshare`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vw_remittance_eorshare` AS select `c`.`remittanceid` AS `remittanceid`,`r`.`controldate` AS `remittance_controldate`,`r`.`controlno` AS `remittance_controlno`,`r`.`state` AS `remittance_state`,`c`.`txntype` AS `collectiontype_objid`,`po`.`txntypename` AS `collectiontype_name`,`po`.`locationid` AS `org_objid`,`org`.`name` AS `org_name`,'serial' AS `formtype`,'EOR' AS `formno`,0 AS `formtypeindex`,`c`.`objid` AS `receiptid`,`c`.`receiptdate` AS `receiptdate`,`c`.`receiptno` AS `receiptno`,`c`.`paidby` AS `paidby`,`c`.`paidbyaddress` AS `paidbyaddress`,'EOR' AS `collectorid`,`ci`.`receiptitemid` AS `receiptitemid`,`ci`.`refitem_objid` AS `refacctid`,`ci`.`refitem_fund_objid` AS `reffundid`,`ci`.`payableitem_fund_objid` AS `fundid`,`ci`.`payableitem_objid` AS `acctid`,`ci`.`payableitem_code` AS `acctcode`,`ci`.`payableitem_title` AS `acctname`,NULL AS `remarks`,`ci`.`amount` AS `amount`,0 AS `voided`,0.0 AS `voidamount` from ((((`eor`.`eor_remittance` `r` join `eor`.`eor` `c` on((`c`.`remittanceid` = `r`.`objid`))) join `eor`.`eor_share` `ci` on((`ci`.`parentid` = `c`.`objid`))) left join `eor`.`eor_paymentorder_paid` `po` on((`po`.`objid` = `c`.`paymentrefid`))) left join `training_etracs`.`sys_org` `org` on((`org`.`objid` = `po`.`locationid`))) */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -16419,4 +16746,4 @@ USE `training_etracs`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-11-22 13:09:10
+-- Dump completed on 2023-04-11 16:37:28
