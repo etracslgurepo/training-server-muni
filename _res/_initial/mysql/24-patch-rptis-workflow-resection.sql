@@ -53,3 +53,4 @@ INSERT INTO `sys_wf_transition` (`parentid`, `processname`, `action`, `to`, `idx
 
 INSERT ignore INTO `sys_var` (`name`, `value`, `description`, `datatype`, `category`) VALUES ('fileserver_download_task_active', '0', 'Activate / Deactivate download task', 'boolean', 'SYSTEM');
 INSERT ignore INTO `sys_var` (`name`, `value`, `description`, `datatype`, `category`) VALUES ('fileserver_upload_task_active', '0', 'Activate / Deactivate upload task', 'boolean', 'SYSTEM');
+ 
