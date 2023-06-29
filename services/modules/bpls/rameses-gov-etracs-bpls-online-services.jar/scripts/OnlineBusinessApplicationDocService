@@ -123,6 +123,7 @@ class OnlineBusinessApplicationDocService {
 			fileitem.createdby = file.createdby; 
 			fileitem.caption = doc.attachment.name; 
 			fileitem.filelocid = fileloc.objid; 
+			fileitem.filetype = file.filetype;
 			fileitem.filesize = 0; 
 			fileitem.state = 'PENDING'; 
 			em_fileitem.create( fileitem ); 
