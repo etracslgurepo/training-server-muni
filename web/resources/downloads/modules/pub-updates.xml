@@ -1,6 +1,6 @@
 <app>
 <env>
-app.title=ETRACS 2.5 build 2.5.05.02 (${lgu_name})
+app.title=ETRACS 2.5 TRAINING build 2.5.05.03 (${lgu_name})
 app.host=${pub_app_server_ip}:18070
 app.cluster=osiris3
 app.context=etracs25
@@ -26,7 +26,7 @@ socketio.host=${pub_app_server_ip}:17080
 
    <import file="etracs/updates.pxml"/> 
 
-   <import file="entity/updates.pxml"/> 
+   <import file="entity/pub-updates.pxml"/> 
 
    <import file="treasury/updates.pxml"/> 
 
