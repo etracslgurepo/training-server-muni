@@ -136,9 +136,11 @@ class OnlineAppNewService {
  			it.name = it.lob.name; 
  		}
 
- 		newapp.appinfos = oldapp.infos;
- 		newapp.appinfos.each{
- 			it.level = 0; 
+ 		newapp.appinfos = [];
+ 		oldapp.infos.groupBy{ it.objid }.each{ k,v-> 
+ 			def bi = v.first();
+ 			bi.level = 0; 
+ 			newapp.appinfos << bi; 
  		}
 
  		newapp.requirements = oldapp.requirements; 
