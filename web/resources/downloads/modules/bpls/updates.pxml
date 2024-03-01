@@ -5,7 +5,7 @@ bpls.app.host=${app_server_ip}:8070
 bpls.app.context=etracs25
 </env>
 <modules>
-   <module version="2.23" file="bpls/rameses-gov-etracs-bpls.jar" />
+   <module version="2.24" file="bpls/rameses-gov-etracs-bpls.jar" />
    <module version="2.07" file="bpls/rameses-gov-etracs-bpls-reports.jar" />
    <module version="2.04" file="bpls/rameses-gov-etracs-bpls-offices.jar" />
    <module version="2.04" file="bpls/rameses-gov-etracs-bpls-ceo.jar" />
