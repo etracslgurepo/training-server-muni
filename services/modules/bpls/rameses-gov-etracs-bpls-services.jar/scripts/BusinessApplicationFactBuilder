@@ -12,6 +12,9 @@ public class BusinessApplicationFactBuilder {
 	@ActiveDB( dynamic=true )
 	def dyna_ADB;
 
+	@Service( dynamic=true )
+	def dynaSvc; 
+
 	@ProxyMethod
 	public void build(def app, def facts) {
 		def fapp = new BPApplication( app );

@@ -1,13 +1,17 @@
 [getList]
-SELECT 
-    bl.*, 
-    lc.name AS classification_name, 
-    lc.objid as classification_objid   
+SELECT
+	bl.*, 
+	lc.name AS classification_name, 
+	lc.objid as classification_objid, 
+	lob.psicid, sc.code psic_code, 
+	sc.description as psic_description 
 FROM business_application_lob bl
-INNER JOIN business b ON b.objid=bl.businessid
-INNER JOIN lob ON bl.lobid=lob.objid
-INNER JOIN lobclassification lc ON lob.classification_objid=lc.objid 
-WHERE bl.applicationid = $P{applicationid}
+	INNER JOIN business b ON b.objid = bl.businessid
+	INNER JOIN lob ON lob.objid = bl.lobid 
+	INNER JOIN lobclassification lc ON lc.objid = lob.classification_objid 
+	left join psic_subclass sc on sc.code = lob.psicid 
+WHERE bl.applicationid = $P{applicationid} 
+
 
 [removeList]
 DELETE FROM business_application_lob WHERE applicationid=$P{applicationid}

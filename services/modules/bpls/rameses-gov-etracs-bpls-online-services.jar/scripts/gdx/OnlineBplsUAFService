@@ -15,6 +15,7 @@ class OnlineBplsUAFService {
 	public def generateNew( app ) {
 		buildDataForNew( app ); 
 		capitalize( app ); 
+		resolveApp( app ); 
 
 		def param = [ 
 			data: app, 
@@ -205,4 +206,19 @@ class OnlineBplsUAFService {
 		SCH: 'SCHOOL',
 		NGO: 'NON-GOVERNMENT ORGANIZATION'
 	]; 
+
+
+	void resolveApp( app ) {
+		if ( app.business instanceof Map ) {
+			app.business.orgtype = app.orgtypeid; 
+			
+			def addr = app.business.address;
+			if ( addr == null ) { 
+				app.business.address = addr = [:]; 
+			}
+
+			def addrtype = addr.type; 
+			addr.type = (addrtype ? addrtype.toLowerCase() : 'local'); 
+		} 
+	}
 }
